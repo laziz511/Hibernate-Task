@@ -19,6 +19,7 @@ public class App {
             Group group2 = aGroup("second group", List.of(student3), 2025);
 
             Course course1 = aCourse("Software Development", "This course is about software development", List.of(group1, group2));
+            Course course2 = aCourse("Database Development", "This course is about Database development", List.of(group1));
 
             // Save the entities
             session.save(student1);
@@ -37,28 +38,33 @@ public class App {
             e.printStackTrace();
         }
 
-        // Now, in a separate session and transaction, retrieve and print students for a specific course
-        Transaction transaction2 = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction2 = session.beginTransaction();
+            // Retrieve students by course name
+            String courseNameToSearch = "Software Development";
+            List<Student> studentsInCourse = getStudentsByCourseName(session, courseNameToSearch);
 
-            String courseName = "Software Development";
-
-            Course course = getCourseByName(session, courseName);
-
-            List<Student> studentsForCourse = course.getStudentsForCourse(courseName);
-
-            System.out.println("Students in Course '" + courseName + "':");
-            studentsForCourse.forEach(System.out::println);
-
-            transaction2.commit();
-        } catch (Exception e) {
-            if (transaction2 != null) {
-                transaction2.rollback();
+            if (studentsInCourse != null) {
+                System.out.println("Students in course " + courseNameToSearch + ":");
+                for (Student student : studentsInCourse) {
+                    System.out.println(student.getFirstName() + " " + student.getLastName());
+                }
+            } else {
+                System.out.println("Course not found or no students in the course.");
             }
-            e.printStackTrace();
         }
+    }
 
+    // Helper method to retrieve students by course name
+    private static List<Student> getStudentsByCourseName(Session session, String courseName) {
+        Course course = getCourseByName(session, courseName);
+        if (course != null) {
+            return course.getGroups()
+                    .stream()
+                    .flatMap(group -> group.getStudents().stream())
+                    .distinct()
+                    .toList();
+        }
+        return null;
     }
 
     // Helper method to retrieve a course by name
@@ -73,8 +79,8 @@ public class App {
         return new Student(firstName, lastName, email);
     }
 
-    private static Group aGroup(String groupName, List<Student> students, int yearOfGraduation) {
-        return new Group(groupName, students, yearOfGraduation);
+    private static Group aGroup(String groupName, List<Student> students, int yearOfgraduation) {
+        return new Group(groupName, students, yearOfgraduation);
     }
 
     private static Course aCourse(String courseName, String courseDescription, List<Group> groups) {
