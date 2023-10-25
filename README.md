@@ -1,2 +1,2 @@
 # Hibernate-Task
-Uzum - Hometask on Hibernate
+Uzum IT Academy - Hometask on Hibernate
