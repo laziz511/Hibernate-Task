@@ -1,6 +1,5 @@
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -68,19 +67,4 @@ public class Course {
     public String toString() {
         return "Course [id=" + id + ", courseName=" + courseName + ", courseDescription=" + courseDescription + "]";
     }
-
-    // Method to retrieve a list of students for a specific course
-    public List<Student> getStudentsForCourse(String courseName) {
-        List<Student> students = new ArrayList<>();
-        if (this.courseName.equals(courseName)) {
-            for (Group group : groups) {
-                if (group.getGroupName().equals(courseName)) {
-                    students.addAll(group.getStudents());
-                    System.out.println(" - -- - - - -  - - -- -  keldi");
-                }
-            }
-        }
-        return students;
-    }
-
 }
